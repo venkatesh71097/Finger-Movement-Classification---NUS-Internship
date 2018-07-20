@@ -109,7 +109,7 @@ with tf.device('/gpu:2'):
     #print(dataset)
     d = np.array(dataset)
     print(d.shape)
-    segments = d.reshape(820,90,8)
+    segments = d.reshape(1000,90,8)
     numOfRows = segments.shape[1]
     numOfColumns = segments.shape[2]
     numChannels = 1
@@ -142,9 +142,9 @@ with tf.device('/gpu:2'):
     trainY = labels[trainSplit]
     testY = labels[~trainSplit]
     zprint(trainX.shape)"""
-    trainX,testX = reshapedSegments[:660,:],reshapedSegments[660:,:]
-    trainY,testY = labels[:660,:],labels[660:,:]
-    trY, teY     = label[:660],label[660:]
+    trainX,testX = reshapedSegments[:800,:],reshapedSegments[800:,:]
+    trainY,testY = labels[:800,:],labels[800:,:]
+    trY, teY     = label[:800],label[800:]
 
     print(trainX.shape)
     def cnnModel():
