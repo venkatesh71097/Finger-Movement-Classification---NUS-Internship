@@ -87,28 +87,6 @@ with tf.device('/gpu:2'):
         for j in range(5):
             for i in range(20):
                 if k > 6:
-                    if j <=2:
-                        count = 0
-                        with open(s[j]+'%d.txt'%(i+1),'r') as f:
-                            lines = (f.read().splitlines())
-                            print(f.name)
-                            lines = [w.replace("[", '') for w in lines]
-                            lines = [w.replace(']', '') for w in lines]
-                            lines = [w.replace('  ', '') for w in lines]
-                            lines = [w.replace(' ', '') for w in lines]
-                            print(len(lines))
-                            for l in lines:
-                                li = l.split(",")
-                                li = [float(ele) for ele in li]
-                                count = count + 1 
-                                if count <= 90:
-                                    dataset.append(li)
-                        label = np.append(label, j)
-                        print(label)
-                    else:
-                        break
-                else:
-                    count = 0
                     with open(q[j]+'%d.txt'%(i+1),'r') as f:
                         lines = (f.read().splitlines())
                         print(f.name)
