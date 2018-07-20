@@ -4,6 +4,8 @@ import os
 import keras
 os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
+#Keras package initializers
+
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout, BatchNormalization, Activation
 from keras.layers.normalization import BatchNormalization
@@ -17,7 +19,9 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ReduceLROnPlateau
 import matplotlib.pyplot as plt
 
+#logs the epochial data to CSV file 
 csv_logger = CSVLogger('tr_final.csv', append=True, separator=';')
+
 co0=0 
 co1=0
 co2=0
@@ -80,6 +84,8 @@ label= np.empty((0))
 r = []
 q = ['t','i','r','l','s']
 s = ['t','i','r']
+
+#reads the data from the trainingsets file - 10 subjects
 with tf.device('/gpu:2'):
     for k in range(9):	 
         path = "/data/venki/myonet/trainingsets/sub%d"%(k+1)
@@ -103,7 +109,8 @@ with tf.device('/gpu:2'):
                                 dataset.append(li)
                     label = np.append(label, j)
                     print(label)
-                
+    
+    #output of the dataset                 
     labels = np.asarray(pd.get_dummies(label),dtype = np.int8)
     print(len(dataset))
     #print(dataset)
@@ -142,11 +149,17 @@ with tf.device('/gpu:2'):
     trainY = labels[trainSplit]
     testY = labels[~trainSplit]
     zprint(trainX.shape)"""
+    
+    #splitting into training and testing datasets
     trainX,testX = reshapedSegments[:800,:],reshapedSegments[800:,:]
     trainY,testY = labels[:800,:],labels[800:,:]
     trY, teY     = label[:800],label[800:]
 
+    #printing the shape of the trainX for verification
+    
     print(trainX.shape)
+    
+    #initializing the CNN model! 
     def cnnModel():
         model = Sequential()
         # adding the first convolutionial layer with 32 filters and 5 by 5 kernal size, using the rectifier as the activation function
@@ -190,6 +203,8 @@ with tf.device('/gpu:2'):
         model.add(MaxPool2D(pool_size=(1,1)))
         #model.add(Dropout(0.25))
         model.add(Flatten())
+        
+        #Fully connected networks! 
 
         model.add(Dense(512, activation = "relu",use_bias = True))
         model.add(Dense(1024, activation = "relu",use_bias = True))
@@ -200,6 +215,8 @@ with tf.device('/gpu:2'):
 
 
         #model.add(Dropout(0.5))
+        
+        #adding the final dense network 
         model.add(Dense(5, activation = "softmax"))
         #optimizer = RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
         model.compile(optimizer = 'adam', loss = "categorical_crossentropy", metrics=["accuracy"])
@@ -219,6 +236,7 @@ with tf.device('/gpu:2'):
                                         factor=0.5, 
                                         min_lr=0.00001)
     
+    #data_augmentation_done
     datagen = ImageDataGenerator(
             featurewise_center=False,  # set input mean to 0 over the dataset
             samplewise_center=False,  # set each sample mean to 0
@@ -231,6 +249,7 @@ with tf.device('/gpu:2'):
             height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
             horizontal_flip=True,  # randomly flip images
             vertical_flip=True)  # randomly flip images
+    #fitting our training data on the datagen 
     datagen.fit(trainX)
     
     history = model.fit_generator(datagen.flow(trainX,trainY, batch_size=4),
@@ -238,11 +257,17 @@ with tf.device('/gpu:2'):
                               verbose = 2, steps_per_epoch=trainX.shape[0] // 4
                               , callbacks=[learning_rate_reduction])
     #model.fit(trainX,trainY,epochs=200,batch_size=4,verbose=2)
+    #the evaluated value! 
+    
     score = model.evaluate(testX,testY,verbose=1)
     print(score)
+    
+    #predicted value of the model for each testX value
     y_pred = model.predict(testX)
     a = np.argmax(y_pred,axis=1)
     print(a)
+    
+    #getting the confusion matrix
     from sklearn.metrics import confusion_matrix
     print(confusion_matrix(teY, a))
 
